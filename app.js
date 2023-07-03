@@ -21,7 +21,7 @@ mongoose.connect(MONGODB_URL, {
 const app = express();
 
 app.use(bodyParser.json())
-app.use(routes);
+
 app.use((req, res, next) => {
   req.user = {
     _id: '64a03074de65a1df35cb4077' // вставьте сюда _id созданного в предыдущем пункте пользователя
@@ -30,6 +30,16 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(routes);
+
+// Промежуточное программное обеспечение для обработки ошибок
+app.use((err, req, res, next) => {
+  const statusCode = err.status || 500;
+
+  res.status(statusCode).json({
+    message: err.message || 'Произошла ошибка',
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
