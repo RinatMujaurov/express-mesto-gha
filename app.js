@@ -32,19 +32,18 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
-app.use(errors());
-
-app.use((err, req, res, next) => {
-  // если у ошибки нет статуса, выставляем 500
-  const { statusCode = 500, message } = err;
-
-  res
-    .status(statusCode)
+app.use((error, req, res, next) => {
+  const {
+    status = 500,
+    message,
+  } = error;
+  res.status(status)
     .send({
-      message: statusCode === 500
+      message: status === 500
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT, () => {
