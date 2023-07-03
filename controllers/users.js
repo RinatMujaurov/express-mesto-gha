@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const ValidationError = require("../errors/ValidationError");
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -26,12 +27,18 @@ module.exports.createUser = (req, res, next) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        return next(new ValidationError("Некорректные данные пользователя"));
+      }
+      return next(error);
+    });
 };
 
 module.exports.updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
+
   User.findByIdAndUpdate(
     userId,
     { name, about },
@@ -44,9 +51,14 @@ module.exports.updateProfile = (req, res, next) => {
         throw error;
       }
       res.send({ data: user });
-      next(); 
+      next();
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        return next(new ValidationError("Некорректные данные пользователя"));
+      }
+      return next(error);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
