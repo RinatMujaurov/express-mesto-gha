@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const ValidationError = require("../errors/ValidationError");
-const cardIdRegex = /^[0-9a-fA-F]{24}$/;
+
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -10,10 +10,6 @@ module.exports.getUsers = (req, res, next) => {
 
 module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
-
-  if (!cardIdRegex.test(userId)) {
-    return next(new ValidationError("Некорректный ID пользователя"));
-  }
 
   User.findById(userId)
     .then((user) => {
@@ -29,6 +25,9 @@ module.exports.getUserById = (req, res, next) => {
       if (error.name === "ValidationError") {
         return next(new ValidationError("Некорректные данные пользователя"));
       }
+      if (error.name === "CastError") {
+        return next(new ValidationError("Некорректный ID пользователя", 400));
+      }
       return next(error);
     });
 };
@@ -41,7 +40,7 @@ module.exports.createUser = (req, res, next) => {
   }
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === "ValidationError") {
         return next(new ValidationError("Некорректные данные пользователя"));

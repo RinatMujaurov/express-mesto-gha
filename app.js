@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const routes = require('./routes/index');
 const bodyParser = require('body-parser');
 const ValidationError = require('./errors/ValidationError');
+const helmet = require('helmet');
+
 
 const {
   MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
@@ -22,6 +24,8 @@ mongoose.connect(MONGODB_URL, {
 const app = express();
 
 app.use(bodyParser.json())
+
+app.use(helmet());
 
 app.use((req, res, next) => {
   req.user = {

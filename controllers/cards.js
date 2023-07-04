@@ -13,7 +13,7 @@ module.exports.createCard = (req, res, next) => {
   const userId = req.user._id;
 
   Card.create({ name, link, owner: userId })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((error) => {
       if (error.name === "ValidationError") {
         return next(new ValidationError("Некорректные данные карточки"));
