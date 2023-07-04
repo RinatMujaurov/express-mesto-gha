@@ -40,6 +40,9 @@ app.use((error, req, res, next) => {
   if (error instanceof ValidationError) {
     status = 400;
     message = error.message;
+  } else if (error.message === 'Карточка не найдена') {
+    status = 404;
+    message = error.message;
   }
 
   res.status(status).send({ message });

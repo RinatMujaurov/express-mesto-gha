@@ -1,7 +1,6 @@
 const Card = require("../models/card");
 const ValidationError = require("../errors/ValidationError");
-const mongoose = require('mongoose');
-const { isValidObjectId } = mongoose.Types;
+const cardIdRegex = /^[0-9a-fA-F]{24}$/;
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -46,7 +45,7 @@ module.exports.deleteCard = (req, res, next) => {
 module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!isValidObjectId(cardId)) {
+  if (!cardIdRegex.test(cardId)) {
     return next(new ValidationError("Некорректный ID карточки"));
   }
 
@@ -70,7 +69,7 @@ module.exports.likeCard = (req, res, next) => {
 module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!isValidObjectId(cardId)) {
+  if (!cardIdRegex.test(cardId)) {
     return next(new ValidationError("Некорректный ID карточки"));
   }
 
