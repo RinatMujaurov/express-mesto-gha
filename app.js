@@ -40,7 +40,7 @@ app.use((error, req, res, next) => {
   if (error instanceof ValidationError) {
     status = 400;
     message = error.message;
-  } else if (error.message === 'Карточка не найдена') {
+  } else if (error.message === 'Карточка не найдена' || error.message === 'Пользователь не найден' || error.message === 'Некорректный ID пользователя') {
     status = 404;
     message = error.message;
   }

@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const ValidationError = require("../errors/ValidationError");
+const cardIdRegex = /^[0-9a-fA-F]{24}$/;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -9,6 +10,10 @@ module.exports.getUsers = (req, res, next) => {
 
 module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
+
+  if (!cardIdRegex.test(userId)) {
+    return next(new ValidationError("Некорректный ID пользователя"));
+  }
 
   User.findById(userId)
     .then((user) => {
