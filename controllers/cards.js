@@ -1,6 +1,7 @@
+const mongoose = require('mongoose');
 const Card = require("../models/card");
 const ValidationError = require("../errors/ValidationError");
-const cardIdRegex = /^[0-9a-fA-F]{24}$/;
+const { isValidObjectId } = mongoose;
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -25,33 +26,33 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError("Некорректный ID карточки"));
+  if (!isValidObjectId(cardId)) {
+    const error = new Error('Некорректный ID карточки');
+    error.status = 400;
+    return next(error);
   }
 
-  Card.findById(cardId)
+  Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
-        const error = new Error("Карточка не найдена");
+        const error = new Error('Карточка не найдена');
         error.status = 404;
         throw error;
       }
-      Card.findByIdAndRemove(cardId)
-        .then((user) => {
-          res.send({ data: user });
-        });
+
+      res.send({ data: card });
+      next();
     })
-    .catch((error) => {
-      if (error.name === 'ValidationError') { return next(new ValidationError("Некорректные данные карточки")); }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError("Некорректный ID карточки"));
+  if (!isValidObjectId(cardId)) {
+    const error = new Error('Некорректный ID карточки');
+    error.status = 400;
+    return next(error);
   }
 
   Card.findByIdAndUpdate(
@@ -74,8 +75,10 @@ module.exports.likeCard = (req, res, next) => {
 module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError("Некорректный ID карточки"));
+  if (!isValidObjectId(cardId)) {
+    const error = new Error('Некорректный ID карточки');
+    error.status = 400;
+    return next(error);
   }
 
   Card.findByIdAndUpdate(
