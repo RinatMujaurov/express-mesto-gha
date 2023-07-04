@@ -35,8 +35,8 @@ module.exports.deleteCard = (req, res, next) => {
           res.send({ data: user });
         });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') { return next(new ValidationError('Error Data')); }
+    .catch((error) => {
+      if (error.name === 'ValidationError') { return next(new ValidationError("Некорректные данные карточки")); }
       return next(err);
     });
 };

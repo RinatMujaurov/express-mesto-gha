@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes/index');
 const bodyParser = require('body-parser');
+const ValidationError = require('./errors/ValidationError');
 
 const {
   MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
@@ -33,17 +34,15 @@ app.use((req, res, next) => {
 app.use(routes);
 
 app.use((error, req, res, next) => {
-  const {
-    status = 500,
-    message,
-  } = error;
-  res.status(status)
-    .send({
-      message: status === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
+  let status = 500;
+  let message = 'На сервере произошла ошибка';
+
+  if (error instanceof ValidationError) {
+    status = 400;
+    message = error.message;
+  }
+
+  res.status(status).send({ message });
 });
 
 app.listen(PORT, () => {
