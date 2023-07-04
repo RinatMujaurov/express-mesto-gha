@@ -24,6 +24,11 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
+
+  if (!cardIdRegex.test(cardId)) {
+    return next(new ValidationError("Некорректный ID карточки"));
+  }
+
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
