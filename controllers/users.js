@@ -22,11 +22,8 @@ module.exports.getUserById = (req, res, next) => {
       next();
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        return next(new ValidationError("Некорректные данные пользователя"));
-      }
-      if (error.name === "CastError") {
-        return next(new ValidationError("Некорректный ID пользователя", 400));
+      if (error.name === 'ValidationError' || error.name === 'CastError') {
+        return next(new ValidationError("Некорректные данные пользователя", 400));
       }
       return next(error);
     });

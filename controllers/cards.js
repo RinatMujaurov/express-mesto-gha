@@ -25,10 +25,6 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError("Некорректный ID карточки"));
-  }
-
   Card.findByIdAndRemove(cardId)
     .then((card) => {
       if (!card) {
@@ -40,7 +36,12 @@ module.exports.deleteCard = (req, res, next) => {
       res.send({ data: card });
       next();
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        return next(new ValidationError('Некорректный ID карточки', 400));
+      }
+      next(error);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
