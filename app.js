@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const routes = require('./routes/index');
 const bodyParser = require('body-parser');
+const routes = require('./routes/index');
 const ValidationError = require('./errors/ValidationError');
 
 const {
   MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
-  PORT = 3000,
+  PORT = 3000 || 4000,
 } = process.env;
 
 mongoose.connect(MONGODB_URL, {
