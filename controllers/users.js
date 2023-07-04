@@ -17,13 +17,23 @@ module.exports.getUserById = (req, res, next) => {
         error.status = 404;
         throw error;
       }
-      res.send(user);
+      res.send({ data: user });
+      next();
     })
-    .catch((error) => next(error));
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        return next(new ValidationError("Некорректные данные пользователя"));
+      }
+      return next(error);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
+
+  if (!name || !about || !avatar) {
+    return next(new ValidationError("Отсутствуют обязательные поля"));
+  }
 
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))

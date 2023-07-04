@@ -1,5 +1,7 @@
 const Card = require("../models/card");
 const ValidationError = require("../errors/ValidationError");
+const mongoose = require('mongoose');
+const { isValidObjectId } = mongoose.Types;
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -42,36 +44,48 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
+  const { cardId } = req.params;
+
+  if (!isValidObjectId(cardId)) {
+    return next(new ValidationError("Некорректный ID карточки"));
+  }
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then((user) => {
-      if (!user) {
-        const error = new Error("Пользователь не найден");
+    .then((card) => {
+      if (!card) {
+        const error = new Error("Карточка не найдена");
         error.status = 404;
         throw error;
       }
-      res.send({ data: user });
+      res.send({ data: card });
       next();
     })
     .catch(next);
 };
 
 module.exports.dislikeCard = (req, res, next) => {
+  const { cardId } = req.params;
+
+  if (!isValidObjectId(cardId)) {
+    return next(new ValidationError("Некорректный ID карточки"));
+  }
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .then((user) => {
-      if (!user) {
-        const error = new Error("Пользователь не найден");
+    .then((card) => {
+      if (!card) {
+        const error = new Error("Карточка не найдена");
         error.status = 404;
         throw error;
       }
-      res.send({ data: user });
+      res.send({ data: card });
       next();
     })
     .catch(next);
