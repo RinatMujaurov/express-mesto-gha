@@ -9,8 +9,9 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
+  const userId = req.user._id;
 
-  Card.create({ name, link })
+  Card.create({ name, link, owner: userId })
     .then((card) => res.send({ data: card }))
     .catch((error) => {
       if (error.name === "ValidationError") {
@@ -21,17 +22,23 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((user) => {
-      if (!user) {
-        const error = new Error("Пользователь не найден");
+  const { cardId } = req.params;
+  Card.findById(cardId)
+    .then((card) => {
+      if (!card) {
+        const error = new Error("Карточка не найдена");
         error.status = 404;
         throw error;
       }
-      res.send({ data: user });
-      next();
+      Card.findByIdAndRemove(cardId)
+        .then((user) => {
+          res.send({ data: user });
+        });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') { return next(new ValidationError('Error Data')); }
+      return next(err);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
