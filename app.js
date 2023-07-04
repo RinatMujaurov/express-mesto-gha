@@ -33,21 +33,20 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
+// Обработчик 404 - несуществующий путь
 app.use((req, res, next) => {
   const error = new Error('Not Found');
   error.status = 404;
   next(error);
 });
 
+// Обработчик ошибок
 app.use((error, req, res, next) => {
-  let status = 500;
-  let message = 'На сервере произошла ошибка';
+  let status = error.status || 500;
+  let message = error.message || 'На сервере произошла ошибка';
 
   if (error instanceof ValidationError) {
     status = 400;
-    message = error.message;
-  } else if (error.message === 'Карточка не найдена' || error.message === 'Пользователь не найден' || error.message === 'Некорректный ID пользователя') {
-    status = 404;
     message = error.message;
   }
 
