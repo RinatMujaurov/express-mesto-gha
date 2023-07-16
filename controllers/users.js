@@ -31,7 +31,14 @@ module.exports.createUser = (req, res, next) => {
     return next(new ValidationError('Отсутствуют обязательные поля'));
   }
 
-  bcrypt.hash(password, 10)
+  User.findOne({ email }) // Проверка наличия пользователя с таким же email
+    .then((existingUser) => {
+      if (existingUser) {
+        throw new ConflictError('Email уже существует');
+      }
+
+      return bcrypt.hash(password, 10);
+    })
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
@@ -41,9 +48,6 @@ module.exports.createUser = (req, res, next) => {
       res.status(201).send({ data: userData });
     })
     .catch((error) => {
-      if (error.code === 11000) {
-        return next(new ConflictError('Email уже существует'));
-      }
       if (error.name === 'ValidationError') {
         return next(new ValidationError('Некорректные данные пользователя'));
       }
@@ -51,7 +55,14 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
+
 module.exports.getUsers = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).send({ message: 'Требуется авторизация' });
+  }
+
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
     .catch(next);
