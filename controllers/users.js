@@ -57,12 +57,6 @@ module.exports.createUser = (req, res, next) => {
 
 
 module.exports.getUsers = (req, res, next) => {
-  const token = req.headers.authorization;
-
-  if (!token) {
-    return res.status(401).send({ message: 'Требуется авторизация' });
-  }
-
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
     .catch(next);
