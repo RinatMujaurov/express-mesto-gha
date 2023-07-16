@@ -11,7 +11,6 @@ const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 const { createUserValidation, loginValidation } = require('./middlewares/validation');
 
-
 const {
   MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
   PORT = 3000,
@@ -39,8 +38,6 @@ app.use(auth);
 app.use(routes);
 app.use(errors());
 app.use(errorHandler);
-
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
