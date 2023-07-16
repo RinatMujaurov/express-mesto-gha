@@ -1,13 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const helmet = require('helmet');
-const bodyParser = require('body-parser');
 const routes = require('./routes/index');
-const ValidationError = require('./errors/ValidationError');
+const {
+  createUser,
+  login,
+} = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
+const { createUserValidation, loginValidation } = require('./middlewares/validation');
+
 
 const {
   MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
-  PORT = 3000 || 4000,
+  PORT = 3000,
 } = process.env;
 
 mongoose.connect(MONGODB_URL, {
@@ -22,39 +29,18 @@ mongoose.connect(MONGODB_URL, {
 
 const app = express();
 
-app.use(bodyParser.json())
-
+app.use(express.json());
 app.use(helmet());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64a03074de65a1df35cb4077' // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
+app.post('/signin', loginValidation, login);
+app.post('/signup', createUserValidation, createUser);
 
-  next();
-});
-
+app.use(auth);
 app.use(routes);
+app.use(errors());
+app.use(errorHandler);
 
-// Обработчик 404 - несуществующий путь
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
-});
 
-// Обработчик ошибок
-app.use((error, req, res, next) => {
-  let status = error.status || 500;
-  let message = error.message || 'На сервере произошла ошибка';
-
-  if (error instanceof ValidationError) {
-    status = 400;
-    message = error.message;
-  }
-
-  res.status(status).send({ message });
-});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
