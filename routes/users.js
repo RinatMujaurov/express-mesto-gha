@@ -5,8 +5,8 @@ const {
 const { updateProfileValidation, updateAvatarValidation, userIdValidation } = require('../middlewares/validation');
 
 usersRouter.get('/', getUsers);
-usersRouter.get('/:userId', userIdValidation, getUserById);
 usersRouter.get('/me', getUserInfo);
+usersRouter.get('/:userId', userIdValidation, getUserById);
 usersRouter.patch('/me', updateProfileValidation, updateProfile);
 usersRouter.patch('/me/avatar', updateAvatarValidation, updateAvatar);
 

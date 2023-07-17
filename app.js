@@ -30,7 +30,7 @@ mongoose.connect(MONGODB_URL, {
 
 const app = express();
 
-// app.use(cookieParser());
+app.use(cookieParser());
 app.use(express.json());
 app.use(helmet());
 
