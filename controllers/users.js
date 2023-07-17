@@ -4,23 +4,38 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
-const UnauthorizedError = require('../errors/UnauthorizedError');
+
+const secretKey = process.env.JWT_SECRET;
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new UnauthorizedError('Неправильные email или пароль');
-      }
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
 
-      // вернём токен
-      res.send({ token });
+      // Установить куку с токеном
+      res.cookie('token', token, { httpOnly: true, secure: true });
+
+      // Отправить ответ с сообщением
+      res.send({ message: 'Авторизация прошла успешно' });
     })
     .catch((error) => next(error));
 };
+
+// module.exports.login = (req, res, next) => {
+//   const { email, password } = req.body;
+
+//   return User.findUserByCredentials(email, password)
+//     .then((user) => {
+//       const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
+
+//       // Отправить ответ с токеном в теле
+//       res.send({ token });
+//     })
+//     .catch((error) => next(error));
+// };
+
 
 module.exports.createUser = (req, res, next) => {
   const {

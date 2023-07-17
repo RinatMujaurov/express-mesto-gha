@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const routes = require('./routes/index');
 const {
   createUser,
@@ -28,6 +30,7 @@ mongoose.connect(MONGODB_URL, {
 
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(helmet());
 
