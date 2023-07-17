@@ -5,11 +5,7 @@ const ForbiddenError = require('../errors/ForbiddenError');
 
 const cardIdRegex = /^[0-9a-fA-F]{24}$/;
 
-module.exports.getCards = (req, res, next) => {
-  Card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch((err) => next(err));
-};
+
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -23,6 +19,12 @@ module.exports.createCard = (req, res, next) => {
       }
       return next(error);
     });
+};
+
+module.exports.getCards = (req, res, next) => {
+  Card.find({})
+    .then((cards) => res.send({ data: cards }))
+    .catch((err) => next(err));
 };
 
 module.exports.deleteCard = (req, res, next) => {

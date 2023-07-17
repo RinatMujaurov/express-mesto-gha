@@ -9,14 +9,6 @@ const urlValidation = (url) => {
   throw new ValidationError('Некорректный URL');
 };
 
-const idValidation = (id) => {
-  const regex = /^[0-9a-fA-F]{26}$/;
-  if (regex.test(id)) {
-    return id;
-  }
-  throw new ValidationError('Некорректный id');
-};
-
 module.exports.createUserValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -49,7 +41,7 @@ module.exports.updateAvatarValidation = celebrate({
 
 module.exports.userIdValidation = celebrate({
   body: Joi.object().keys({
-    userId: Joi.string().required().custom(idValidation),
+    userId: Joi.string().required().length(24).hex(),
   }),
 });
 
@@ -62,6 +54,6 @@ module.exports.createCardValidation = celebrate({
 
 module.exports.cardIdValidation = celebrate({
   body: Joi.object().keys({
-    cardId: Joi.string().required().custom(idValidation),
+    cardId: Joi.string().required().length(24).hex(),
   }),
 });
