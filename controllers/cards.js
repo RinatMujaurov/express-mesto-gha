@@ -28,7 +28,7 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
@@ -36,9 +36,11 @@ module.exports.deleteCard = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Нет доступа для удаления данной карточки');
       }
-      Card.findByIdAndRemove(cardId).then((user) => {
-        res.status(201).send({ data: user });
-      });
+
+      return Card.findByIdAndRemove(cardId);
+    })
+    .then((deletedCard) => {
+      res.status(200).send({ data: deletedCard });
     })
     .catch((error) => {
       if (error.name === 'CastError') {

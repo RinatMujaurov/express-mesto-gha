@@ -10,7 +10,7 @@ const urlValidation = (url) => {
 };
 
 const idValidation = (id) => {
-  const regex = /^[0-9a-fA-F]{24}$/;
+  const regex = /^[0-9a-fA-F]{25}$/;
   if (regex.test(id)) {
     return id;
   }
