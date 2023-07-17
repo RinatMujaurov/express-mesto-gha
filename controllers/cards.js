@@ -3,7 +3,6 @@ const NotFoundError = require("../errors/NotFoundError");
 const ValidationError = require("../errors/ValidationError");
 const ForbiddenError = require("../errors/ForbiddenError");
 
-
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
@@ -35,8 +34,7 @@ module.exports.deleteCard = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError("Нет доступа для удаления данной карточки");
       }
-
-      return Card.findByIdAndRemove(cardId);
+      Card.findByIdAndRemove(cardId);
     })
     .then((deletedCard) => {
       res.status(200).send({ data: deletedCard });
