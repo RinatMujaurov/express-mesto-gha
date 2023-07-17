@@ -5,8 +5,6 @@ const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
 
-const secretKey = process.env.JWT_SECRET;
-
 // module.exports.login = (req, res, next) => {
 //   const { email, password } = req.body;
 
@@ -28,32 +26,13 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, 'secretKey', { expiresIn: '7d' });
 
       // Отправить ответ с токеном в теле
       res.send({ token });
     })
     .catch((error) => next(error));
 };
-
-// module.exports.createUser = (req, res, next) => {
-//   const {
-//     name, about, avatar, email, password,
-//   } = req.body;
-//   bcrypt.hash(password, 10)
-//     .then((hash) => User.create({
-//       name, about, avatar, email, password: hash,
-//     }))
-//     .then((user) => {
-//       const { password, ...userData } = user.toObject();
-//       res.status(201).send({ data: userData });
-//     })
-//     .catch((err) => {
-//       if (error.name === 'ValidationError') { return next(new ValidationError('Некорректные данные пользователя')); }
-//       if (error.code === 11000) { return next(new ConflictError('Email уже существует')); }
-//       return res.status(500).send({ message: 'ошибка сервера' });
-//     });
-// };
 
 module.exports.createUser = (req, res, next) => {
   const {

@@ -1,9 +1,6 @@
 const jwt = require("jsonwebtoken");
 const UnauthorizedError = require("../errors/UnauthorizedError");
 
-// Получение секретного ключа из переменной среды
-const secretKey = process.env.JWT_SECRET;
-
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
@@ -14,7 +11,7 @@ module.exports = (req, res, next) => {
   const token = authorization.replace("Bearer ", "");
   let payload;
   try {
-    payload = jwt.verify(token, secretKey);
+    payload = jwt.verify(token, 'secretKey');
   } catch (error) {
     return next(new UnauthorizedError("Необходима авторизация"));
   }
