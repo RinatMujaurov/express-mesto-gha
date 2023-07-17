@@ -7,22 +7,6 @@ const ConflictError = require('../errors/ConflictError');
 
 const secretKey = process.env.JWT_SECRET;
 
-module.exports.login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
-
-      // Установить куку с токеном
-      res.cookie('token', token, { httpOnly: true, secure: true });
-
-      // Отправить ответ с сообщением
-      res.send({ message: 'Авторизация прошла успешно' });
-    })
-    .catch((error) => next(error));
-};
-
 // module.exports.login = (req, res, next) => {
 //   const { email, password } = req.body;
 
@@ -30,11 +14,27 @@ module.exports.login = (req, res, next) => {
 //     .then((user) => {
 //       const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
 
-//       // Отправить ответ с токеном в теле
-//       res.send({ token });
+//       // Установить куку с токеном
+//       res.cookie('token', token, { httpOnly: true, secure: true });
+
+//       // Отправить ответ с сообщением
+//       res.send({ message: 'Авторизация прошла успешно' });
 //     })
 //     .catch((error) => next(error));
 // };
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
+
+      // Отправить ответ с токеном в теле
+      res.send({ token });
+    })
+    .catch((error) => next(error));
+};
 
 
 module.exports.createUser = (req, res, next) => {
