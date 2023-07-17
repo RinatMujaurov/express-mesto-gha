@@ -1,10 +1,7 @@
-const Card = require('../models/card');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
-const ForbiddenError = require('../errors/ForbiddenError');
-
-const cardIdRegex = /^[0-9a-fA-F]{24}$/;
-
+const Card = require("../models/card");
+const NotFoundError = require("../errors/NotFoundError");
+const ValidationError = require("../errors/ValidationError");
+const ForbiddenError = require("../errors/ForbiddenError");
 
 
 module.exports.createCard = (req, res, next) => {
@@ -14,8 +11,8 @@ module.exports.createCard = (req, res, next) => {
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ data: card }))
     .catch((error) => {
-      if (error.name === 'ValidationError') {
-        return next(new ValidationError('Некорректные данные карточки'));
+      if (error.name === "ValidationError") {
+        return next(new ValidationError("Некорректные данные карточки"));
       }
       return next(error);
     });
@@ -33,10 +30,10 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена');
+        throw new NotFoundError("Карточка не найдена");
       }
       if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Нет доступа для удаления данной карточки');
+        throw new ForbiddenError("Нет доступа для удаления данной карточки");
       }
 
       return Card.findByIdAndRemove(cardId);
@@ -45,8 +42,8 @@ module.exports.deleteCard = (req, res, next) => {
       res.status(200).send({ data: deletedCard });
     })
     .catch((error) => {
-      if (error.name === 'CastError') {
-        return next(new ValidationError('Некорректный ID карточки', 400));
+      if (error.name === "CastError") {
+        return next(new ValidationError("Некорректный ID карточки", 400));
       }
       next(error);
     });
@@ -55,21 +52,20 @@ module.exports.deleteCard = (req, res, next) => {
 module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError('Некорректный ID карточки'));
-  }
-
-  Card.findByIdAndUpdate(
-    cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
-  )
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена');
+        throw new NotFoundError("Карточка не найдена");
       }
-      res.send({ data: card });
-      next();
+
+      return Card.findByIdAndUpdate(
+        cardId,
+        { $addToSet: { likes: req.user._id } },
+        { new: true }
+      );
+    })
+    .then((updatedCard) => {
+      res.send({ data: updatedCard });
     })
     .catch(next);
 };
@@ -77,18 +73,21 @@ module.exports.likeCard = (req, res, next) => {
 module.exports.dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  if (!cardIdRegex.test(cardId)) {
-    return next(new ValidationError('Некорректный ID карточки'));
-  }
-
-  Card.findByIdAndUpdate(
-    cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  )
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена');
+        throw new NotFoundError("Карточка не найдена");
+      }
+
+      return Card.findByIdAndUpdate(
+        cardId,
+        { $pull: { likes: req.user._id } },
+        { new: true }
+      );
+    })
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError("Карточка не найдена");
       }
       res.send({ data: card });
       next();
