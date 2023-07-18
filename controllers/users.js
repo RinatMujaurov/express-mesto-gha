@@ -5,22 +5,6 @@ const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
 
-// module.exports.login = (req, res, next) => {
-//   const { email, password } = req.body;
-
-//   return User.findUserByCredentials(email, password)
-//     .then((user) => {
-//       const token = jwt.sign({ _id: user._id }, secretKey, { expiresIn: '7d' });
-
-//       // Установить куку с токеном
-//       res.cookie('token', token, { httpOnly: true, secure: true });
-
-//       // Отправить ответ с сообщением
-//       res.send({ message: 'Авторизация прошла успешно' });
-//     })
-//     .catch((error) => next(error));
-// };
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -31,43 +15,31 @@ module.exports.login = (req, res, next) => {
       // Отправить ответ с токеном в теле
       res.send({ token });
     })
-    .catch((error) => next(error));
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!email || !password) {
-    return next(new ValidationError('Отсутствуют обязательные поля'));
-  }
-  User.findOne({ email }) // Проверка наличия пользователя с таким же email
-    .then((existingUser) => {
-      if (existingUser) {
-        throw new ConflictError('Email уже существует');
-      }
-      return bcrypt.hash(password, 10);
-    })
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      // Исключаем поле password из ответа
       const { password, ...userData } = user.toObject();
-      res.status(201).send({ data: userData });
+      res.status(201).send({ data: UserData });
     })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        return next(new ValidationError('Некорректные данные пользователя'));
-      }
-      return next(error);
+    .catch((err) => {
+      if (err.name === 'ValidationError') { return next(new ValidationError('Некорректные данные пользователя')); }
+      if (err.code === 11000) { return next(new ConflictError('Email уже существует')); }
+      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 
-
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.send({ data }))
     .catch(next);
 };
 
@@ -81,7 +53,7 @@ module.exports.getUserInfo = (req, res, next) => {
         throw new NotFoundError('Пользователь не найден');
       }
 
-      res.status(200).send({ data: user });
+      res.send({ data });
     })
     .catch(next);
 };
@@ -94,7 +66,7 @@ module.exports.getUserById = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      res.status(200).send({ data: user });
+      res.send({ data });
     })
     .catch((error) => {
       if (error.name === 'ValidationError' || error.name === 'CastError') {
@@ -103,9 +75,6 @@ module.exports.getUserById = (req, res, next) => {
       next(error);
     });
 };
-
-
-
 
 module.exports.updateProfile = (req, res, next) => {
   const userId = req.user._id;
@@ -120,7 +89,7 @@ module.exports.updateProfile = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      res.status(200).send({ data: user });
+      res.send({ data });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
@@ -143,7 +112,7 @@ module.exports.updateAvatar = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      res.status(200).send({ data: user });
+      res.send({ data });
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
