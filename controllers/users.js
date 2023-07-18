@@ -34,8 +34,9 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      const { password, ...userData } = user.toObject();
-      res.status(201).send({ data: userData });
+      const UserDeletePassword = user.toObject();
+      delete UserDeletePassword.password;
+      res.status(201).send({ data: UserDeletePassword });
     })
     .catch((error) => {
       if (error.code === 11000) {
