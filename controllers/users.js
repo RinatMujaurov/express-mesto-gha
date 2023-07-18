@@ -1,17 +1,17 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const NotFoundError = require("../errors/NotFoundError");
-const ValidationError = require("../errors/ValidationError");
-const ConflictError = require("../errors/ConflictError");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const NotFoundError = require('../errors/NotFoundError');
+const ValidationError = require('../errors/ValidationError');
+const ConflictError = require('../errors/ConflictError');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, "secretKey", {
-        expiresIn: "7d",
+      const token = jwt.sign({ _id: user._id }, 'secretKey', {
+        expiresIn: '7d',
       });
 
       // Отправить ответ с токеном в теле
@@ -21,30 +21,29 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) =>
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      })
-    )
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => {
       const { password, ...userData } = user.toObject();
       res.status(201).send({ data: userData });
     })
     .catch((error) => {
       if (error.code === 11000) {
-        return next(new ConflictError("Email уже существует"));
-      } else if (error.name === "ValidationError") {
-        return next(new ValidationError("Некорректные данные пользователя"));
-      } else {
-        next(error);
+        return next(new ConflictError('Email уже существует'));
+      } if (error.name === 'ValidationError') {
+        return next(new ValidationError('Некорректные данные пользователя'));
       }
+      next(error);
     });
 };
 
@@ -58,10 +57,10 @@ module.exports.getUserInfo = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
-    .select("-password")
+    .select('-password')
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
 
       res.send({ data: user });
@@ -75,14 +74,14 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError" || error.name === "CastError") {
+      if (error.name === 'ValidationError' || error.name === 'CastError') {
         return next(
-          new ValidationError("Некорректные данные пользователя", 400)
+          new ValidationError('Некорректные данные пользователя', 400),
         );
       }
       next(error);
@@ -96,18 +95,18 @@ module.exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(
     userId,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === 'ValidationError') {
         return next(
-          new ValidationError("Некорректные данные пользователя", 400)
+          new ValidationError('Некорректные данные пользователя', 400),
         );
       }
       next(error);
@@ -121,14 +120,14 @@ module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === 'ValidationError') {
         return next(
-          new ValidationError("Некорректные данные пользователя", 400)
+          new ValidationError('Некорректные данные пользователя', 400),
         );
       }
       next(error);
