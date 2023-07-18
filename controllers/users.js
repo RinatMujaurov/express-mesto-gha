@@ -40,9 +40,10 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((error) => {
       if (error.code === 11000) {
-        return next(new ConflictError('Email уже существует'));
-      } if (error.name === 'ValidationError') {
-        return next(new ValidationError('Некорректные данные пользователя'));
+        next(new ConflictError('Email уже существует'));
+      }
+      if (error.name === 'ValidationError') {
+        next(new ValidationError('Некорректные данные пользователя'));
       }
       next(error);
     });
@@ -81,9 +82,7 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError' || error.name === 'CastError') {
-        return next(
-          new ValidationError('Некорректные данные пользователя', 400),
-        );
+        next(new ValidationError('Некорректные данные пользователя', 400));
       }
       next(error);
     });
@@ -106,9 +105,7 @@ module.exports.updateProfile = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return next(
-          new ValidationError('Некорректные данные пользователя', 400),
-        );
+        next(new ValidationError('Некорректные данные пользователя', 400));
       }
       next(error);
     });
@@ -127,9 +124,7 @@ module.exports.updateAvatar = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return next(
-          new ValidationError('Некорректные данные пользователя', 400),
-        );
+        next(new ValidationError('Некорректные данные пользователя', 400));
       }
       next(error);
     });

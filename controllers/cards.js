@@ -41,7 +41,7 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return next(new ValidationError('Некорректный ID карточки', 400));
+        next(new ValidationError('Некорректный ID карточки', 400));
       }
       next(error);
     });
