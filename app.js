@@ -5,22 +5,20 @@ const { errors } = require('celebrate');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const routes = require('./routes/index');
-const {
-  createUser,
-  login,
-} = require('./controllers/users');
+const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
-const { createUserValidation, loginValidation } = require('./middlewares/validation');
-
 const {
-  MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb',
-  PORT = 3000,
-} = process.env;
+  createUserValidation,
+  loginValidation,
+} = require('./middlewares/validation');
 
-mongoose.connect(MONGODB_URL, {
-  useNewUrlParser: true,
-})
+const { MONGODB_URL = 'mongodb://127.0.0.1:27017/mestodb', PORT = 3000 } = process.env;
+
+mongoose
+  .connect(MONGODB_URL, {
+    useNewUrlParser: true,
+  })
   .then(() => {
     console.log('Connected to MongoDB');
   });
