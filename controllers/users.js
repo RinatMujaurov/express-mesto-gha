@@ -28,7 +28,7 @@ module.exports.createUser = (req, res, next) => {
     }))
     .then((user) => {
       const { password, ...userData } = user.toObject();
-      res.status(201).send({ data: UserData });
+      res.status(201).send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') { return next(new ValidationError('Некорректные данные пользователя')); }
